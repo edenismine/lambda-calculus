@@ -6,17 +6,17 @@ El programa es la implementación del cálculo lambda. El cálculo lambda
 $\textbf(\lambda)$ consiste de tres términos y todas las combinaciones
 recursivas válidas de estos mismos.
 
-  - Var - Una variable.
+- Var - Una variable.
 
-  - Lam - Una abstracción.
+- Lam - Una abstracción.
 
-  - App - Una aplicación.
+- App - Una aplicación.
 
 ### Sintáxis $\textbf(\lambda)$
 
 Se definen las expresiones del cálculo lambda del siguiente modo:
 
-``` haskell
+```haskell
 type Identifier = String
 
 data Expr = Var Identifier
@@ -32,7 +32,7 @@ de la parte alfabética).
 
 Se creó una instancia de la clase `Show` para las expresiones lambda.
 
-``` haskell
+```haskell
 instance Show Expr where
   show e = case e of
     Var x   -> x
@@ -56,7 +56,7 @@ paquete.
 
 #### Sustitución
 
-La evaluación de un término lambda $(\lambda x.\epsilon)a$ consiste en
+La evaluación de un término lambda $(\lambda x\cdot\epsilon)a$ consiste en
 sustituir todas las ocurrencias libres de $x$ en $\epsilon$ por el
 argumento $a$. A este paso de la sustitución se le llama reducción. La
 sustitución se denota como $[x:=a]$ y se define del siguiente
@@ -70,11 +70,11 @@ $$e e'[x:=a]=(e[x:=a])(e'[x:=a])$$
 
 $$\lambda x\cdot e[x:=a]=\lambda x\cdot e$$
 
-$$\lambda y\cdot e [x:=a] = \lambda y\cdot (e[x:=a])\text{  }si\text{  } x \neq y \land y \notin frVars(a)$$
+$$\lambda y\cdot e [x:=a] = \lambda y\cdot (e[x:=a])\text{ }si\text{ } x \neq y \land y \notin frVars(a)$$
 
 Definimos el tipo de sustitución:
 
-``` haskell
+```haskell
 type Substitution = (Identifier, Expr)
 ```
 
@@ -84,11 +84,11 @@ La alfa equivalencia es la propiedad de cambiar la variable ligada,
 junto con todas sus ocurrencias libres dentro del cuerpo sin cambiar el
 significado de la expresión.
 
-$$\lambda x.e \equiv^\alpha \lambda y.(e[x:=y])$$
+$$\lambda x\cdot e \equiv^\alpha \lambda y\cdot (e[x:=y])$$
 
 En esta parte se implementaron las siguientes funciones:
 
-``` haskell
+```haskell
 -- | frVars
 -- | Función que obtiene el conjunto de variables libres de una expresión.
 frVars :: Expr -> [Identifier]
@@ -120,7 +120,7 @@ La beta reducción es simplemente un paso de sustitución remplazando la
 variable ligada por una expresión lambda por el argumento de la
 aplicación.
 
-$$(\lambda x.a)y \rightarrow^\beta a[x:=y]$$
+$$(\lambda x\cdot a)y \rightarrow^\beta a[x:=y]$$
 
 ### Evaluación
 
@@ -128,17 +128,17 @@ La estrategia de evaluación de una expresión consistirá en aplicar la
 beta reducción hasta que ya no sea posible, usando las siguientes
 reglas:
 
-$$\infer[(Lam)]{\lambda x.t \rightarrow \lambda x.t'}{t \rightarrow t'}$$
+$$\infer[(Lam)]{\lambda x\cdot t \rightarrow \lambda x\cdot t'}{t \rightarrow t'}$$
 
 $$\infer[(App1)]{t_1 t_2 \rightarrow t'_1 t'_2}{t_1 \rightarrow t'_1}$$
 
-$$\infer[(App2)]{(\lambda x.t) t_1 \rightarrow (\lambda x.t)t'_1}{t_1 \rightarrow t'_1}$$
+$$\infer[(App2)]{(\lambda x\cdot t) t_1 \rightarrow (\lambda x\cdot t)t'_1}{t_1 \rightarrow t'_1}$$
 
-$$\infer[(Beta)]{(\lambda x.t)y \rightarrow^\beta t[x:=y]}{}$$
+$$\infer[(Beta)]{(\lambda x\cdot t)y \rightarrow^\beta t[x:=y]}{}$$
 
 Y se implementaron las siguientes funciones:
 
-``` haskell
+```haskell
 --------------------------------------------------
 --------------   beta-reducción  --------------------
 --------------------------------------------------
