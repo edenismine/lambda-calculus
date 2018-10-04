@@ -91,9 +91,9 @@ eval e = error "Implementar"
 {-  FUNCIONES AUXILIARES  -}
 
 -- |dedup.
--- Esta función remueve duplicados de una lista en tiempo O(n log n)
+-- Esta función remueve duplicados de una lista.
 dedup :: Ord a => [a] -> [a]
-dedup = map head . group . sort
+dedup = union []
 
 -- |fvAux.
 fvAux :: [Identifier] -> [Identifier] -> Exp -> [Identifier]
