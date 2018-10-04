@@ -33,7 +33,7 @@ instance Show Exp where
   show e = case e of
     Var x   -> x
     Lam x e -> "\\"++ x ++ " -> " ++ show e
-    App x y -> "("++show x ++ " " ++ show y ++ ")"
+    App x y -> "("++ show x ++ " " ++ show y ++ ")"
 
 --Definiendo el tipo de sustitución.
 type Substitution = (Identifier , Exp)
@@ -44,9 +44,9 @@ frVars :: Exp -> [Identifier]
 frVars = dedup . fvAux [] []
 
 -- | lkVars
--- | Función que obtiene el conjunto de variables de una expresión.
+-- | Función que obtiene el conjunto de variables ligadas de una expresión.
 lkVars :: Exp -> [Identifier]
-lkVars e = error "Implementar"
+lkVars = dedup . bvAux []
 
 -- | incrVar
 -- | Función que dado un identificador,
@@ -88,7 +88,9 @@ locked e = error "Implementar"
 eval :: Exp -> Exp
 eval e = error "Implementar"
 
-{-  FUNCIONES AUXILIARES  -}
+-------------------------------------------------
+---------   Funciones Auxiliares  ---------------
+-------------------------------------------------
 
 -- |dedup.
 -- Esta función remueve duplicados de una lista.
@@ -101,3 +103,10 @@ fvAux free bounded exp = case exp of
   Var x   -> if x `elem` bounded then free else x : free
   Lam x e -> fvAux free (x:bounded) e
   App x y -> fvAux free bounded x `union` fvAux free bounded y
+
+-- |bvAux.
+bvAux :: [Identifier] -> Exp -> [Identifier]
+bvAux bounded exp = case exp of
+  Var x   -> bounded
+  Lam x e -> bvAux (x:bounded) e
+  App x y -> bvAux bounded x `union` bvAux bounded y
