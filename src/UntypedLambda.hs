@@ -33,7 +33,7 @@ instance Show Exp where
   show e = case e of
     Var x   -> x
     Lam x e -> "\\"++ x ++ " -> " ++ show e
-    App x y -> "("++show x ++ " " ++ show y ++ ")"
+    App x y -> "("++ show x ++ " " ++ show y ++ ")"
 
 --Definiendo el tipo de sustitución.
 type Substitution = (Identifier , Exp)
