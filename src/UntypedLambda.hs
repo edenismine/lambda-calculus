@@ -3,6 +3,7 @@
 - Práctica 3
 - Autores:
 -   Luis Daniel Aragón Bermúdez
+-   Joshua Jair Pedrero Gómez
 - Profesor: Dr. Favio Ezequiel Miranda Perea
 - Ayudante: Diego Carrillo Verduzco
 - Laboratorio: Pablo Gerardo González López
@@ -20,6 +21,8 @@ module UntypedLambda (
   locked,
   eval
 ) where
+
+import Data.List
 
 type Identifier = String
 
@@ -84,3 +87,7 @@ locked e = error "Implementar"
 -- | aplicando beta reducciones hasta quedar bloqueada.
 eval :: Expr -> Expr
 eval e = error "Implementar"
+
+{-  FUNCIONES AUXILIARES  -}
+dedup :: Ord a => [a] -> [a]
+dedup = map head . group . sort
