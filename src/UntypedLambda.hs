@@ -22,8 +22,8 @@ module UntypedLambda (
   eval
 ) where
 
-import           Data.List
-import           Text.Read
+import Data.List
+import Text.Read
 
 type Identifier = String
 
@@ -74,10 +74,20 @@ subst e s = error "Implementar"
 --------------   β-reducción  --------------------
 --------------------------------------------------
 
--- | beta.
+-- | beta. (ver 0.1)
 -- | Función que aplica un paso de la beta reducción.
+-- |
+-- | Dado que la función subst aún no ha sido implementada, se considera cada
+-- | uno de los casos para variable, lambda, aplicación con variable, aplicación
+-- | con lambda y aplicación con aplicación. Finalmente sólo se utilizarán dos 
+-- | de éstos casos, pero es relevante mantenerlos así para encontrar errores.
 beta :: Exp -> Exp
-beta e = error "Implementar"
+beta (Var x) = Var x
+beta (Lam x (Exp e0)) = Lam x (Exp e0)
+beta (App (Var x) (Exp e0)) = App (App (Var x) (Exp e0))
+beta (App (Lam x (Exp e0)) (Exp e1)) = subst( Lam x e0 (x e1) )
+beta (App (App (Exp e0) (Exp e1)) (Exp e2)) = App (beta (Exp e0) (Exp e2)) (beta (Exp e1) (Exp e2))
+beta e = error "Entrada Desconocida"
 
 -- | locked.
 -- | Función que determina si una expresión está bloqueada,
@@ -121,5 +131,5 @@ ivAux var = case break isNum var of
   (letters, []) -> Right (letters ++ "1")
   (letters, nums) -> case readMaybe nums of
     Nothing -> Left "Invalid variable name, found letters after digits"
-    Just n  -> Right (letters ++ show (n + 1))
+    Just n -> Right (letters ++ show (n + 1))
   where isNum char = char `elem`  "0123456789"
