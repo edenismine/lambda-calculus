@@ -90,19 +90,21 @@ subst exp s@(x, exp') = case exp of
 -- | beta.
 -- | Función que aplica un paso de la beta reducción.
 beta :: Exp -> Exp
-beta e = error "implementar"
+beta = fromMaybe (error "Cannot beta reduce an expression in beta normal form") . safeBeta
 
 -- | locked.
 -- | Función que determina si una expresión está bloqueada,
 -- | es decir, no se pueden hacer más beta reducciones.
 locked :: Exp -> Bool
-locked e = error "Implementar"
+locked e = case safeBeta e of
+  Just _ -> False
+  Nothing -> True
 
 -- | eval.
 -- | Función que evalúa una expresión lambda
 -- | aplicando beta reducciones hasta quedar bloqueada.
 eval :: Exp -> Exp
-eval e = error "Implementar"
+eval= fromMaybe undefined . safeEval
 
 -------------------------------------------------
 ---------   Funciones Auxiliares  ---------------
@@ -181,3 +183,17 @@ safeBeta exp = case exp of
         Lam x e -> Just (subst e (x, e2))
         _       -> Nothing
 
+-- | safeEval.
+-- Dada una expresión e, devuelve Just e' si existe e' tal que e ->^{beta}* e'
+-- y e' está bloqueado.
+safeEval :: Exp -> Maybe Exp
+safeEval e = if locked e then Just e else safeEval (beta e)
+
+-- |fromMaybe.
+-- Given a default value and a value wrapped inside a maybe type, it returns
+-- the wrapped value if its present or the default value if no value is
+-- wrapped inside.
+fromMaybe :: a -> Maybe a -> a
+fromMaybe def maybeVal = case maybeVal of
+  Just x -> x
+  Nothing -> def
