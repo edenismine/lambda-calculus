@@ -22,8 +22,8 @@ module UntypedLambda (
   eval
 ) where
 
-import Data.List
-import Text.Read
+import           Data.List
+import           Text.Read
 
 type Identifier = String
 
@@ -59,7 +59,7 @@ incrVar var = case ivAux var of
   Right newVar -> newVar
 
 -- |alphaExpr.
--- Función que toma una expresión lambda y devuelve una α-equivalencia hasta 
+-- Función que toma una expresión lambda y devuelve una α-equivalencia hasta
 -- encontrar un nombre que no aparezca en el cuerpo.
 alphaExpr :: Exp -> Exp
 alphaExpr exp = case exp of
@@ -141,7 +141,7 @@ ivAux var = case break isNum var of
   (letters, []) -> Right (letters ++ "1")
   (letters, nums) -> case readMaybe nums of
     Nothing -> Left "Invalid variable name, found letters after digits"
-    Just n -> Right (letters ++ show (n + 1))
+    Just n  -> Right (letters ++ show (n + 1))
   where isNum char = char `elem`  "0123456789"
 
 -- |renameWithContex.
@@ -159,6 +159,25 @@ renameWithContex used context
 allVars :: Exp -> [Identifier]
 allVars = dedup . allVarsAux []
   where allVarsAux vars exp = case exp of
-          Var x -> x:vars
+          Var x    -> x:vars
           App e e' -> allVarsAux vars e ++ allVarsAux vars e'
-          Lam x e -> allVarsAux (x:vars) e
+          Lam x e  -> allVarsAux (x:vars) e
+
+-- |safeBeta.
+-- Given a lambda expression, attempts to beta reduce it. If the expression
+-- is not in its beta normal form it's beta reduced and wrapped in Just, else
+-- this function yields Nothing.
+safeBeta :: Exp -> Maybe Exp
+safeBeta exp = case exp of
+  Var _ -> Nothing
+  Lam x e -> case safeBeta e of
+    Just e' -> Just (Lam x e')
+    Nothing -> Nothing
+  App e1 e2 -> case safeBeta e1 of
+    Just e1' -> Just (App e1' e2)
+    Nothing -> case safeBeta e2 of
+      Just e2' -> Just (App e1 e2')
+      Nothing  -> case e1 of
+        Lam x e -> Just (subst e (x, e2))
+        _       -> Nothing
+
