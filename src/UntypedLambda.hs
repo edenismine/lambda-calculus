@@ -58,17 +58,30 @@ incrVar var = case ivAux var of
   Left message -> error message
   Right newVar -> newVar
 
--- | alphaExpr
--- | Función que toma una expresión lambda
--- | y devuelve una α-equivalencia utilizando la función incrVar
--- | hasta encontrar un nombre que no aparezca en el cuerpo.
+-- |alphaExpr.
+-- Función que toma una expresión lambda y devuelve una α-equivalencia hasta 
+-- encontrar un nombre que no aparezca en el cuerpo.
 alphaExpr :: Exp -> Exp
-alphaExpr e = error "Implementar"
+alphaExpr exp = case exp of
+  Var x -> exp
+  App e e' -> App (alphaExpr e) (alphaExpr e')
+  Lam x e -> let x' = renameWithContex x (allVars exp) in
+    Lam x' (subst e (x, Var x'))
 
--- | subst
--- | Función que aplica la sustitución a la expresión dada.
+-- |subst.
+-- Función que aplica la sustitución a la expresión dada.
 subst :: Exp -> Substitution -> Exp
-subst e s = error "Implementar"
+subst exp s@(x, exp') = case exp of
+  Var x'
+    | x == x' -> exp'
+    | otherwise -> exp
+  App e e' -> App (subst e s) (subst e' s)
+  Lam x' e
+    | x' == x -> exp
+    | x' `elem` frVars exp' ->
+      let newVar = renameWithContex x' (allVars exp ++ allVars exp') in
+        subst (Lam newVar (subst e (x', Var newVar))) s
+    | otherwise -> Lam x' (subst e s)
 
 --------------------------------------------------
 --------------   β-reducción  --------------------
@@ -101,6 +114,8 @@ dedup :: Ord a => [a] -> [a]
 dedup = union []
 
 -- |fvAux.
+-- Función recursiva con acumulador que acumula las variables libres de una
+-- expresión dada.
 fvAux :: [Identifier] -> [Identifier] -> Exp -> [Identifier]
 fvAux free bounded exp = case exp of
   Var x   -> if x `elem` bounded then free else x : free
@@ -108,6 +123,8 @@ fvAux free bounded exp = case exp of
   App x y -> fvAux free bounded x `union` fvAux free bounded y
 
 -- |bvAux.
+-- Función recursiva con acumulador que acumula las variables ligadas de una
+-- expresión dada.
 bvAux :: [Identifier] -> Exp -> [Identifier]
 bvAux bounded exp = case exp of
   Var x   -> bounded
@@ -115,6 +132,9 @@ bvAux bounded exp = case exp of
   App x y -> bvAux bounded x `union` bvAux bounded y
 
 -- |ivAux.
+-- Given an identifier, this function attempts to retrieve a new name and if it
+-- fails a descriptive error message is returned instead. Right values are
+-- valid new identifiers and Left values are error messages.
 ivAux :: Identifier -> Either Identifier String
 ivAux var = case break isNum var of
   ([], nums) -> Left "Invalid variable name, it's a digit."
@@ -123,3 +143,22 @@ ivAux var = case break isNum var of
     Nothing -> Left "Invalid variable name, found letters after digits"
     Just n -> Right (letters ++ show (n + 1))
   where isNum char = char `elem`  "0123456789"
+
+-- |renameWithContex.
+-- Given an identifier and a list of used identifiers (henceforth called
+-- context), this function retrieves a new identifier using incrVar until it
+-- cannot be found inside the context.
+renameWithContex :: Identifier -> [Identifier] -> Identifier
+renameWithContex used context
+  | newVar `elem` context = renameWithContex newVar (used:context)
+  | otherwise = newVar
+  where newVar = incrVar used
+
+-- |allVars.
+-- Given a lambda expression, this function retrieves all its variables.
+allVars :: Exp -> [Identifier]
+allVars = dedup . allVarsAux []
+  where allVarsAux vars exp = case exp of
+          Var x -> x:vars
+          App e e' -> allVarsAux vars e ++ allVarsAux vars e'
+          Lam x e -> allVarsAux (x:vars) e
