@@ -74,20 +74,10 @@ subst e s = error "Implementar"
 --------------   β-reducción  --------------------
 --------------------------------------------------
 
--- | beta. (ver 0.1)
+-- | beta.
 -- | Función que aplica un paso de la beta reducción.
--- |
--- | Dado que la función subst aún no ha sido implementada, se considera cada
--- | uno de los casos para variable, lambda, aplicación con variable, aplicación
--- | con lambda y aplicación con aplicación. Finalmente sólo se utilizarán dos 
--- | de éstos casos, pero es relevante mantenerlos así para encontrar errores.
 beta :: Exp -> Exp
-beta (Var x) = Var x
-beta (Lam x (Exp e0)) = Lam x (Exp e0)
-beta (App (Var x) (Exp e0)) = App (App (Var x) (Exp e0))
-beta (App (Lam x (Exp e0)) (Exp e1)) = subst( Lam x e0 (x e1) )
-beta (App (App (Exp e0) (Exp e1)) (Exp e2)) = App (beta (Exp e0) (Exp e2)) (beta (Exp e1) (Exp e2))
-beta e = error "Entrada Desconocida"
+beta e = error "implementar"
 
 -- | locked.
 -- | Función que determina si una expresión está bloqueada,
