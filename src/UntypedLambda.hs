@@ -62,7 +62,11 @@ incrVar var = case ivAux var of
 -- Función que toma una expresión lambda y devuelve una α-equivalencia hasta 
 -- encontrar un nombre que no aparezca en el cuerpo.
 alphaExpr :: Exp -> Exp
-alphaExpr exp = error "implementar"
+alphaExpr exp = case exp of
+  Var x -> exp
+  App e e' -> App (alphaExpr e) (alphaExpr e')
+  Lam x e -> let x' = renameWithContex x (allVars exp) in
+    Lam x' (subst e (x, Var x'))
 
 -- |subst.
 -- Función que aplica la sustitución a la expresión dada.
@@ -110,6 +114,8 @@ dedup :: Ord a => [a] -> [a]
 dedup = union []
 
 -- |fvAux.
+-- Función recursiva con acumulador que acumula las variables libres de una
+-- expresión dada.
 fvAux :: [Identifier] -> [Identifier] -> Exp -> [Identifier]
 fvAux free bounded exp = case exp of
   Var x   -> if x `elem` bounded then free else x : free
@@ -117,6 +123,8 @@ fvAux free bounded exp = case exp of
   App x y -> fvAux free bounded x `union` fvAux free bounded y
 
 -- |bvAux.
+-- Función recursiva con acumulador que acumula las variables ligadas de una
+-- expresión dada.
 bvAux :: [Identifier] -> Exp -> [Identifier]
 bvAux bounded exp = case exp of
   Var x   -> bounded
@@ -124,6 +132,9 @@ bvAux bounded exp = case exp of
   App x y -> bvAux bounded x `union` bvAux bounded y
 
 -- |ivAux.
+-- Given an identifier, this function attempts to retrieve a new name and if it
+-- fails a descriptive error message is returned instead. Right values are
+-- valid new identifiers and Left values are error messages.
 ivAux :: Identifier -> Either Identifier String
 ivAux var = case break isNum var of
   ([], nums) -> Left "Invalid variable name, it's a digit."
@@ -133,19 +144,18 @@ ivAux var = case break isNum var of
     Just n -> Right (letters ++ show (n + 1))
   where isNum char = char `elem`  "0123456789"
 
--- |aeAux
-aeAux :: [Identifier] -> Exp -> Exp
-aeAux = error "implementar"
-
--- |renameWithContex
+-- |renameWithContex.
+-- Given an identifier and a list of used identifiers (henceforth called
+-- context), this function retrieves a new identifier using incrVar until it
+-- cannot be found inside the context.
 renameWithContex :: Identifier -> [Identifier] -> Identifier
 renameWithContex used context
   | newVar `elem` context = renameWithContex newVar (used:context)
   | otherwise = newVar
   where newVar = incrVar used
 
--- |allVars
--- |Given a lambda expression, this function retrieves all its variables.
+-- |allVars.
+-- Given a lambda expression, this function retrieves all its variables.
 allVars :: Exp -> [Identifier]
 allVars = dedup . allVarsAux []
   where allVarsAux vars exp = case exp of
