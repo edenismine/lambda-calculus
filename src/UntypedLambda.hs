@@ -23,6 +23,7 @@ module UntypedLambda (
 ) where
 
 import Data.List
+import Text.Read
 
 type Identifier = String
 
@@ -53,7 +54,9 @@ lkVars = dedup . bvAux []
 -- | si este no termina en número le agrega el sufijo 1,
 -- | en caso contrario toma el valor del número y lo incrementa en 1.
 incrVar :: Identifier -> Identifier
-incrVar e = error "implementar"
+incrVar var = case ivAux var of
+  Left message -> error message
+  Right newVar -> newVar
 
 -- | alphaExpr
 -- | Función que toma una expresión lambda
@@ -110,3 +113,12 @@ bvAux bounded exp = case exp of
   Var x   -> bounded
   Lam x e -> bvAux (x:bounded) e
   App x y -> bvAux bounded x `union` bvAux bounded y
+
+ivAux :: Identifier -> Either Identifier String
+ivAux var = case break isNum var of
+  ([], nums) -> Left "Invalid variable name, it's a digit."
+  (letters, []) -> Right (letters ++ "1")
+  (letters, nums) -> case readMaybe nums of
+    Nothing -> Left "Invalid variable name, found letters after digits"
+    Just n -> Right (letters ++ show (n + 1))
+  where isNum char = char `elem`  "0123456789"
