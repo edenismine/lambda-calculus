@@ -74,7 +74,7 @@ subst e s = error "Implementar"
 --------------   β-reducción  --------------------
 --------------------------------------------------
 
--- | beta. (ver 0.1)
+-- | beta. (ver 0.2)
 -- | Función que aplica un paso de la beta reducción.
 -- |
 -- | Dado que la función subst aún no ha sido implementada, se considera cada
@@ -89,7 +89,7 @@ beta (App (Lam x e0) e1) = subst( (Lam x e0) (x e1) )
 beta (App (App e0 e1) e2) = (App (beta e0 e2) (beta e1 e2))
 beta e = error "Entrada Desconocida"
 
--- | locked.
+-- | locked. (ver 0.1)
 -- | Función que determina si una expresión está bloqueada,
 -- | es decir, no se pueden hacer más beta reducciones.
 locked :: Exp -> Bool
