@@ -22,8 +22,8 @@ module UntypedLambda (
   eval
 ) where
 
-import Data.List
-import Text.Read
+import           Data.List
+import           Text.Read
 
 type Identifier = String
 
@@ -121,5 +121,5 @@ ivAux var = case break isNum var of
   (letters, []) -> Right (letters ++ "1")
   (letters, nums) -> case readMaybe nums of
     Nothing -> Left "Invalid variable name, found letters after digits"
-    Just n -> Right (letters ++ show (n + 1))
+    Just n  -> Right (letters ++ show (n + 1))
   where isNum char = char `elem`  "0123456789"
