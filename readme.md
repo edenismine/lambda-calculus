@@ -19,9 +19,9 @@ Se definen las expresiones del cálculo lambda del siguiente modo:
 ```haskell
 type Identifier = String
 
-data Expr = Var Identifier
-           | Lam Identifier Expr
-           | App Expr Expr
+data Exp = Var Identifier
+           | Lam Identifier Exp
+           | App Exp Exp
 ```
 
 Nosotros denotaremos la lambda por la diagonal (\$, el cuerpo con
@@ -33,7 +33,7 @@ de la parte alfabética).
 Se creó una instancia de la clase `Show` para las expresiones lambda.
 
 ```haskell
-instance Show Expr where
+instance Show Exp where
   show e = case e of
     Var x   -> x
     Lam x e -> "\\"++ x ++ " -> " ++ show e
@@ -75,7 +75,7 @@ $$\lambda y\text{.} e [x:=a] = \lambda y\text{.} (e[x:=a])\text{ }si\text{ } x \
 Definimos el tipo de sustitución:
 
 ```haskell
-type Substitution = (Identifier, Expr)
+type Substitution = (Identifier, Exp)
 ```
 
 #### $\alpha$-equivalencia
@@ -91,27 +91,26 @@ En esta parte se implementaron las siguientes funciones:
 ```haskell
 -- | frVars
 -- | Función que obtiene el conjunto de variables libres de una expresión.
-frVars :: Expr -> [Identifier]
+frVars :: Exp -> [Identifier]
 
 -- | lkVars
--- | Función que obtiene el conjunto de variables de una expresión.
-lkVars :: Expr -> [Identifier]
+-- | Función que obtiene el conjunto de variables ligadas de una expresión.
+lkVars :: Exp -> [Identifier]
 
 -- | incrVar
 -- | Función que dado un identificador,
--- | si este no termina en numero le agrega el sufijo 1,
--- | en caso contrario toma el valor del numero y lo incrementa en 1.
+-- | si este no termina en número le agrega el sufijo 1,
+-- | en caso contrario toma el valor del número y lo incrementa en 1.
 incrVar :: Identifier -> Identifier
 
--- | alphaExpr
--- | Función que toma una expresión lambda
--- | y devuelve una alfa-equivalencia utilizando la función incrVar
--- | hasta encontrar un nombre que no aparezca en el cuerpo.
-alphaExpr :: Expr -> Expr
+-- |alphaExpr.
+-- Función que toma una expresión lambda y devuelve una alfa-equivalencia hasta
+-- encontrar un nombre que no aparezca en el cuerpo.
+alphaExpr :: Exp -> Exp
 
--- | subst
--- | Función que aplica la sustitución a la expresión dada.
-subst :: Expr -> Substitution -> Expr
+-- |subst.
+-- Función que aplica la sustitución a la expresión dada.
+subst :: Exp -> Substitution -> Exp
 ```
 
 ### $\beta$-reducción
@@ -140,22 +139,22 @@ Y se implementaron las siguientes funciones:
 
 ```haskell
 --------------------------------------------------
---------------   beta-reducción  --------------------
+--------------   beta-reducción  -----------------
 --------------------------------------------------
 
 -- | beta.
 -- | Función que aplica un paso de la beta reducción.
-beta :: Expr -> Expr
+beta :: Exp -> Exp
 
 -- | locked.
 -- | Función que determina si una expresión esta bloqueada,
 -- | es decir, no se pueden hacer mas beta reducciones.
-locked :: Expr -> Bool
+locked :: Exp -> Bool
 
 -- | eval.
 -- | Función que evalúa una expresión lambda
 -- | aplicando beta reducciones hasta quedar bloqueada.
-eval :: Expr -> Expr
+eval :: Exp -> Exp
 ```
 
 ## Bibliografía
