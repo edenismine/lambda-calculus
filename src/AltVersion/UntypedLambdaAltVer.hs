@@ -99,7 +99,7 @@ locked e = if beta(e) == e then True else False
 -- | Función que evalúa una expresión lambda
 -- | aplicando beta reducciones hasta quedar bloqueada.
 eval :: Exp -> Exp
-eval e = error "Implementar"
+eval e = if locked(e) then e else beta(e)
 
 -------------------------------------------------
 ---------   Funciones Auxiliares  ---------------
