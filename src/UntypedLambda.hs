@@ -114,6 +114,7 @@ bvAux bounded exp = case exp of
   Lam x e -> bvAux (x:bounded) e
   App x y -> bvAux bounded x `union` bvAux bounded y
 
+-- |ivAux.
 ivAux :: Identifier -> Either Identifier String
 ivAux var = case break isNum var of
   ([], nums) -> Left "Invalid variable name, it's a digit."
