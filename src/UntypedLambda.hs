@@ -33,7 +33,7 @@ data Exp = Var Identifier | Lam Identifier Exp | App Exp Exp deriving Eq
 instance Show Exp where
   show e = case e of
     Var x   -> x
-    Lam x e -> "\\"++ x ++ " -> " ++ show e
+    Lam x exp > "\\"++ x ++ " -> " ++ show exp
     App x y -> "("++ show x ++ " " ++ show y ++ ")"
 
 --Definiendo el tipo de sustitución.
